@@ -1,0 +1,12 @@
+{
+  "timestamp": "2025-08-27T00:50:49.922Z",
+  "model": "gemini-2.5-flash-image-preview",
+  "imageGenerated": true,
+  "textResponse": "Here is the virtual try-on image you requested: ",
+  "responseStructure": {
+    "candidatesCount": 1,
+    "partsCount": 2,
+    "hasImage": true,
+    "hasText": true
+  }
+}

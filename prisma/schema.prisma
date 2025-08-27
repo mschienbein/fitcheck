@@ -1,0 +1,179 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// NextAuth Models
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id               String          @id @default(cuid())
+  email            String?         @unique
+  emailVerified    DateTime?
+  name             String?
+  image            String?
+  hashedPassword   String?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  
+  // Profile fields
+  measurements     Json?           // Body measurements
+  preferences      Json?           // Style preferences
+  subscription     String          @default("free")
+  subscriptionEnd  DateTime?
+  
+  // Relations
+  accounts         Account[]
+  sessions         Session[]
+  baselineImages   BaselineImage[]
+  outfits          Outfit[]
+  clothingItems    ClothingItem[]
+  tryOnHistory     TryOnHistory[]
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// Application Models
+model BaselineImage {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   // "close-up", "full-body", "front", "side", "back"
+  url       String
+  metadata  Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+}
+
+model ClothingItem {
+  id           String        @id @default(cuid())
+  userId       String
+  name         String
+  category     String        // "shirt", "pants", "dress", "shoes", etc.
+  subcategory  String?       // "t-shirt", "jeans", "sneakers", etc.
+  brand        String?
+  color        String?
+  size         String?
+  sourceUrl    String?       // Original product URL
+  imageUrl     String        // Stored image URL
+  price        Float?
+  currency     String?
+  sizingData   Json?         // Scraped sizing information
+  metadata     Json?         // Additional metadata
+  tags         String[]      // User-defined tags
+  isOwned      Boolean       @default(false)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  outfitItems  OutfitItem[]
+  tryOnHistory TryOnHistory[]
+  
+  @@index([userId])
+  @@index([category])
+}
+
+model Outfit {
+  id          String       @id @default(cuid())
+  userId      String
+  name        String
+  description String?
+  occasion    String?      // "casual", "formal", "business", etc.
+  season      String?      // "summer", "winter", etc.
+  weather     String?      // "hot", "cold", "rainy", etc.
+  imageUrl    String?      // Generated outfit image
+  metadata    Json?
+  tags        String[]
+  isFavorite  Boolean      @default(false)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items       OutfitItem[]
+  
+  @@index([userId])
+}
+
+model OutfitItem {
+  id         String       @id @default(cuid())
+  outfitId   String
+  itemId     String
+  layerOrder Int          @default(0) // For layering clothes
+  
+  outfit     Outfit       @relation(fields: [outfitId], references: [id], onDelete: Cascade)
+  item       ClothingItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  
+  @@unique([outfitId, itemId])
+  @@index([outfitId])
+  @@index([itemId])
+}
+
+model TryOnHistory {
+  id                String       @id @default(cuid())
+  userId            String
+  clothingItemId    String
+  baselineImageUrl  String       // Which baseline photo was used
+  resultImageUrl    String       // Generated try-on result
+  prompt            String?      // AI prompt used
+  fitScore          Float?       // Calculated fit score
+  fitNotes          String?      // Fit recommendations
+  metadata          Json?        // Additional data
+  createdAt         DateTime     @default(now())
+  
+  user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clothingItem      ClothingItem @relation(fields: [clothingItemId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([clothingItemId])
+}
+
+model SizeChart {
+  id          String   @id @default(cuid())
+  brand       String
+  category    String   // "mens-shirts", "womens-dresses", etc.
+  sizeData    Json     // Structured size chart data
+  sourceUrl   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@unique([brand, category])
+  @@index([brand])
+}
