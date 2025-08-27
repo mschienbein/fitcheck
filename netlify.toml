@@ -1,9 +1,10 @@
 [build]
-  command = "npm run build"
+  command = "npx next build"
   publish = ".next"
 
 [build.environment]
   NEXT_TELEMETRY_DISABLED = "1"
+  NODE_VERSION = "20"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
@@ -11,11 +12,6 @@
 [functions]
   node_bundler = "esbuild"
   directory = ".netlify/functions"
-
-[[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/api/:splat"
-  status = 200
 
 [[headers]]
   for = "/*"
