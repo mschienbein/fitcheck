@@ -112,23 +112,9 @@ export default function VirtualTryOn({ userId }: VirtualTryOnProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-950 via-black to-purple-950 py-12 px-4">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center justify-center p-2 bg-purple-500/10 rounded-2xl mb-4">
-            <Sparkles className="w-10 h-10 text-purple-400" />
-          </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-            Virtual Try-On Studio
-          </h1>
-          <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-            Upload your photo and a clothing item to see how it looks on you using AI
-          </p>
-        </div>
-
-        {/* Main Content */}
-        <div className="grid lg:grid-cols-3 gap-8">
+    <>
+      {/* Panels */}
+      <section aria-label="Virtual Try-On Workspace" className="grid lg:grid-cols-3 gap-6">
           {/* User Image Upload */}
           <div className="glass rounded-2xl p-6 border border-purple-500/20">
             <div className="flex items-center justify-between mb-4">
@@ -382,21 +368,26 @@ export default function VirtualTryOn({ userId }: VirtualTryOnProps) {
               </div>
             )}
           </div>
-        </div>
+        </section>
 
         {/* Image Cropper Modal */}
         {showCropper && (
           <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
-            <div className="bg-gray-900 rounded-2xl p-6 max-w-4xl w-full max-h-[90vh] overflow-auto">
+            <div className="bg-gray-900 rounded-2xl p-6 max-w-4xl w-full max-h-[90vh] overflow-auto relative">
+              <button
+                onClick={() => setShowCropper(null)}
+                className="absolute right-3 top-3 text-gray-400 hover:text-white"
+                aria-label="Close"
+              >
+                ×
+              </button>
               <ImageCropper
-                image={showCropper === 'user' ? userImage! : clothingImage!}
-                onCrop={(cropped) => handleCrop(cropped, showCropper)}
-                onCancel={() => setShowCropper(null)}
+                imageSrc={showCropper === 'user' ? userImage! : clothingImage!}
+                onCropComplete={(cropped) => handleCrop(cropped, showCropper)}
               />
             </div>
           </div>
         )}
-      </div>
-    </div>
-  );
+      </>
+    );
 }

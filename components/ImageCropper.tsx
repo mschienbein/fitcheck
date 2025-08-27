@@ -52,7 +52,7 @@ export default function ImageCropper({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 text-foreground">
       <ReactCrop
         crop={crop}
         onChange={c => setCrop(c)}
@@ -71,7 +71,7 @@ export default function ImageCropper({
       <button
         onClick={getCroppedImg}
         disabled={!completedCrop?.width || !completedCrop?.height}
-        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+        className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-lg disabled:from-gray-700 disabled:to-gray-700 disabled:bg-gray-700 disabled:cursor-not-allowed"
       >
         Apply Crop
       </button>
